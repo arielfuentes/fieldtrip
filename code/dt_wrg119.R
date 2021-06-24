@@ -52,6 +52,10 @@ tm_lst <- lapply(X = 1:8, FUN = function(x) tmap_save(tm_shape(bg) +
 med_119_cln <- med_119[c(1:4, 6, 8)]
 rm(med_119, bg)
 
+lst_dist <- lapply(med_119_cln, function(x) rename(as_tibble(st_distance(x, sp_119)), 
+                                                   Sur = V1, Norte = V2)
+                   )
+
 lst_119_dist <- lapply(1:6, 
                        function(x) bind_cols(st_drop_geometry(med_119_cln[[x]]), 
                                              lst_dist[[x]])
@@ -68,3 +72,4 @@ dat_119_dist_N <- select(dat_119_dist, -Sur) %>%
   slice_min(Dist)
 dat_119_dist <- bind_rows(dat_119_dist_S, dat_119_dist_N) %>%
   arrange(a, CreatedAt)
+rm(lst_119_dist, dat_119_dist_S, dat_119_dist_N)
