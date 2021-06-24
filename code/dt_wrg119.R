@@ -6,8 +6,8 @@ library(tidyr)
 library(sf)
 library(tmap)
 library(rosm)
-library(stplanr)
-
+library(lubridate)
+library(openxlsx)
 #data
 #bus service starting position
 sp_119 <- st_read("data/cab_119.gpkg") %>%
@@ -40,7 +40,7 @@ bg[bg[]<0]=0
 
 # tmap_save(tm_119, "output/test.png")
 
-
+#data exploration
 tm_lst <- lapply(X = 1:8, FUN = function(x) tmap_save(tm_shape(bg) +
          tm_rgb() +
          tm_shape(med_119[[x]]) +
@@ -51,7 +51,7 @@ tm_lst <- lapply(X = 1:8, FUN = function(x) tmap_save(tm_shape(bg) +
 
 med_119_cln <- med_119[c(1:4, 6, 8)]
 rm(med_119, bg)
-
+#nearest endpoints
 lst_dist <- lapply(med_119_cln, function(x) rename(as_tibble(st_distance(x, sp_119)), 
                                                    Sur = V1, Norte = V2)
                    )
@@ -73,3 +73,16 @@ dat_119_dist_N <- select(dat_119_dist, -Sur) %>%
 dat_119_dist <- bind_rows(dat_119_dist_S, dat_119_dist_N) %>%
   arrange(a, CreatedAt)
 rm(lst_119_dist, dat_119_dist_S, dat_119_dist_N)
+#route travel time
+dat_119_dist2 <- dat_119_dist %>%
+  mutate(CreatedAt2 = lead(CreatedAt)) %>%
+  na.omit() %>%
+  mutate(tm_int = as.duration(interval(CreatedAt, CreatedAt2))) %>%
+  select(fl_nm = a, tm_int)
+#writefile
+wb <- createWorkbook()
+addWorksheet(wb = wb, sheetName = "tiemposdeviaje")
+addWorksheet(wb = wb, sheetName = "geoloc")
+writeData(wb, sheet = "tiemposdeviaje", dat_119_dist2, 1, 1)
+writeData(wb, sheet = "geoloc", dat_119_dist, 1, 1)
+saveWorkbook(wb, file = paste0("output/tviaje119.xlsx"))
