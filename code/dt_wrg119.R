@@ -37,6 +37,7 @@ bg[bg[]<0]=0
 
 # tmap_save(tm_119, "output/test.png")
 
+
 tm_lst <- lapply(X = 1:8, FUN = function(x) tmap_save(tm_shape(bg) +
          tm_rgb() +
          tm_shape(med_119[[x]]) +
