@@ -6,9 +6,12 @@ library(tidyr)
 library(sf)
 library(tmap)
 library(rosm)
+library(stplanr)
+
 #data
 #bus service starting position
-sp_119 <- st_read("data/cab_119.gpkg")
+sp_119 <- st_read("data/cab_119.gpkg") %>%
+  mutate(Name = c("Sur", "Norte"))
 ##field data
 med_119_fl.lst <- list.files("data/4. Mediciones Velocidades/2. Mediciones 119/", 
                         full.names = T) %>%
@@ -46,3 +49,22 @@ tm_lst <- lapply(X = 1:8, FUN = function(x) tmap_save(tm_shape(bg) +
          tm_dots(col = "black", shape = 8, size = .5, ),
          paste0("output/", names(med_119)[x], ".png")))
 
+med_119_cln <- med_119[c(1:4, 6, 8)]
+rm(med_119, bg)
+
+lst_119_dist <- lapply(1:6, 
+                       function(x) bind_cols(st_drop_geometry(med_119_cln[[x]]), 
+                                             lst_dist[[x]])
+                       )          
+          
+dat_119_dist <- bind_rows(lst_119_dist)
+dat_119_dist_S <- select(dat_119_dist, -Norte) %>%
+  rename(Dist = Sur) %>%
+  group_by(a) %>%
+  slice_min(Dist)
+dat_119_dist_N <- select(dat_119_dist, -Sur) %>%
+  rename(Dist = Norte) %>%
+  group_by(a) %>%
+  slice_min(Dist)
+dat_119_dist <- bind_rows(dat_119_dist_S, dat_119_dist_N) %>%
+  arrange(a, CreatedAt)
