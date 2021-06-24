@@ -35,6 +35,12 @@ tm_shape(med_119[[1]]) +
   tm_dots(col = "black", shape = 8, size = .5, )
 
 tmap_save(tm_119, "output/test.png")
-lapply(X = med_119, FUN = function(x) )  
-
+tm_lst <- lapply(X = med_119, FUN = function(x) tm_shape(bg) +
+         tm_rgb() +
+         tm_shape(x) +
+         tm_dots("red") +
+         tm_shape(sp_119) +
+         tm_dots(col = "black", shape = 8, size = .5, ))
+names(tm_lst) <- seq(1:length(tm_lst))
+lapply(X = tm_lst, function(x) tmap_save(x, paste0("output/", x, ".png")))
 
