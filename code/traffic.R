@@ -1,9 +1,6 @@
 library(hereR)
 library(sf)
-set_key("kJ-6fes-iX0tCRAF8fHUVAvubtneFwOmZUPwLjBKa30")
-flows <- flow(
-  aoi = aoi[aoi$code == "LI", ]
-)
+set_key("xyz")
 
 opmina1 <- st_read("data/OpMinaRT2.gpkg") %>%
   st_buffer(dist = 50000)
